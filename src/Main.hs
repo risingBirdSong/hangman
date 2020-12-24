@@ -5,6 +5,11 @@ type WordList = [String]
 minWordLength = 3
 maxWordLength = 9
 
+data Puzzle = Puzzle String [Maybe Char] [Char] deriving (Show) 
+
+freshPuzzle :: String -> Puzzle
+freshPuzzle str = Puzzle str (map (\x -> Nothing) str) []  
+
 
 allWords :: IO WordList
 allWords = do
