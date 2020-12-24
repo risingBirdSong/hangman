@@ -1,15 +1,13 @@
 module Main where
 import Data.List
+import Debug.Trace
 import System.Random
 
 type WordList = [String]
-type WordToGuess = String
-type GuessState = [Maybe Char]
-type GuessedList = String
+
 minWordLength = 3
 maxWordLength = 9
 
-data Puzzle = Puzzle WordToGuess GuessState GuessedList
 
 instance Show Puzzle where
     show (Puzzle _ discovered guessed) =
@@ -50,11 +48,41 @@ renderPuzzleChar :: Maybe Char -> Char
 renderPuzzleChar (Just x) = x
 renderPuzzleChar Nothing  = '_'
 
+type WordToGuess = String
+type GuessState = [Maybe Char]
+type GuessedList = String
+data Puzzle = Puzzle WordToGuess GuessState GuessedList
+type CurGuessChar = Char 
+type CorrectGuess = Char 
+-- correctGuessChar :: CorrectGuess -> CurGuessChar -> Maybe Char
+-- correctGuessChar guess correct  
+--   | correct == guess = Just correct 
+--   | otherwise = Nothing 
+cgmTesta = updateState [Just 't',Just 'h',Nothing,Nothing,Just 't'] "theft" 'z'
+cgmTestb = updateState [Just 't',Just 'h',Nothing,Nothing,Just 't'] "theft" 'f'
+updateState :: GuessState -> WordToGuess -> CurGuessChar -> GuessState
+updateState state correctWord guess = go state correctWord []
+  where go states [] stateAcc = stateAcc  
+        go ((Just x):sts) (l:ls) stateAcc = go sts ls (stateAcc++[Just x]) 
+        go (x:states) (crct:ltrs) stateAcc 
+          | crct == guess = (go (states) ltrs (stateAcc++[Just crct])) 
+          | crct /= guess = (go (states) ltrs (stateAcc++[Nothing]))
+            
 
-testPuzzle = Puzzle "theft" [Just 't',Just 'h',Nothing,Nothing,Nothing] "ath" 
+
+-- fillInCharacter :: Puzzle -> Char -> Puzzle
+-- fillInCharacter input@(Puzzle wrdToGuess guessState guessed) curGs  
+      -- | charInWord input curGs =  Puzzle wrdToGuess guessState (curGs : guessed)
+  
+
+
+
+
+testPuzzle = Puzzle "theft" [Just 't',Just 'h',Nothing,Nothing,Just 't'] "ath" 
 -- main :: IO WordList
 main = do
   allwords <- gameWords
   randomWord <- randomWord allwords 
   putStrLn randomWord
   return ()
+
