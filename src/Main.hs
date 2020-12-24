@@ -1,4 +1,5 @@
 module Main where
+import Data.List
 import System.Random
 
 type WordList = [String]
@@ -8,7 +9,13 @@ type GuessedList = String
 minWordLength = 3
 maxWordLength = 9
 
-data Puzzle = Puzzle WordToGuess GuessState GuessedList deriving (Show) 
+data Puzzle = Puzzle WordToGuess GuessState GuessedList
+
+instance Show Puzzle where
+    show (Puzzle _ discovered guessed) =
+      (fmap renderPuzzleChar discovered)
+      ++ " Guessed so far: " ++ guessed
+
 
 freshPuzzle :: String -> Puzzle
 freshPuzzle str = Puzzle str (map (\x -> Nothing) str) []  
@@ -36,8 +43,15 @@ randomWord wl = do
 charInWord :: Puzzle -> Char -> Bool
 charInWord (Puzzle wordguess _ _ ) guess = guess `elem` wordguess  
 
+alreadyGuessed :: Puzzle -> Char -> Bool
+alreadyGuessed (Puzzle _ _ guessed) guess = guess `elem` guessed 
 
-testPuzzle = Puzzle "theft" [Nothing,Nothing,Nothing,Nothing,Nothing] "" 
+renderPuzzleChar :: Maybe Char -> Char
+renderPuzzleChar (Just x) = x
+renderPuzzleChar Nothing  = '_'
+
+
+testPuzzle = Puzzle "theft" [Just 't',Just 'h',Nothing,Nothing,Nothing] "ath" 
 -- main :: IO WordList
 main = do
   allwords <- gameWords
