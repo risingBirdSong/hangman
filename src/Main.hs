@@ -67,12 +67,18 @@ updateState state correctWord guess = go state correctWord []
         go (x:states) (crct:ltrs) stateAcc 
           | crct == guess = (go (states) ltrs (stateAcc++[Just crct])) 
           | crct /= guess = (go (states) ltrs (stateAcc++[Nothing]))
-            
+updateZip guess (Just x, ltr) = Just x             
+updateZip guess (Nothing, ltr) 
+  | guess == ltr = Just ltr
+  | otherwise = Nothing 
 
+updateState_ state word gs = map (updateZip gs) $ zip state word 
 
--- fillInCharacter :: Puzzle -> Char -> Puzzle
--- fillInCharacter input@(Puzzle wrdToGuess guessState guessed) curGs  
-      -- | charInWord input curGs =  Puzzle wrdToGuess guessState (curGs : guessed)
+fillInCharacter :: Puzzle -> Char -> Puzzle
+fillInCharacter (Puzzle wrdToGuess guessState guessed) curGs = Puzzle wrdToGuess (updateState guessState wrdToGuess curGs) (curGs:guessed)
+  
+fillInCharacter_ :: Puzzle -> Char -> Puzzle
+fillInCharacter_ (Puzzle wrd gsSt gsd) gs = Puzzle wrd (updateState_ gsSt wrd gs) (gs:gsd)
   
 
 
