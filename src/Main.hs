@@ -2,10 +2,13 @@ module Main where
 import System.Random
 
 type WordList = [String]
+type WordToGuess = String
+type GuessState = [Maybe Char]
+type GuessedList = String
 minWordLength = 3
 maxWordLength = 9
 
-data Puzzle = Puzzle String [Maybe Char] [Char] deriving (Show) 
+data Puzzle = Puzzle WordToGuess GuessState GuessedList deriving (Show) 
 
 freshPuzzle :: String -> Puzzle
 freshPuzzle str = Puzzle str (map (\x -> Nothing) str) []  
@@ -29,8 +32,12 @@ randomWord wl = do
   randomIndex <- randomRIO ( 0 , length wl -1 )
   return $ wl !! randomIndex
 
+-- testPuzzle = Puzzle ""
+charInWord :: Puzzle -> Char -> Bool
+charInWord (Puzzle wordguess _ _ ) guess = guess `elem` wordguess  
 
--- test = ran 
+
+testPuzzle = Puzzle "theft" [Nothing,Nothing,Nothing,Nothing,Nothing] "" 
 -- main :: IO WordList
 main = do
   allwords <- gameWords
