@@ -85,20 +85,20 @@ fillInCharacter (Puzzle wrdToGuess guessState guessed) curGs = Puzzle wrdToGuess
 fillInCharacter_ :: Puzzle -> Char -> Puzzle
 fillInCharacter_ (Puzzle wrd gsSt gsd) gs = Puzzle wrd (updateState_ gsSt wrd gs) (gs:gsd)
   
-handleGuess :: Puzzle -> Char -> IO Puzzle
-handleGuess puzzle guess = do
-    putStrLn $ "Your guess was: " ++ [guess]
+handleGuess :: Puzzle -> Char -> Integer  -> IO (Puzzle, Integer )
+handleGuess puzzle guess cnt = do
+    -- putStrLn $ "Your guess was: " ++ [guess]
     case (charInWord puzzle guess
        , alreadyGuessed puzzle guess) of
       (_, True) -> do
         putStrLn "You already guessed that character, pick something else!"
-        return puzzle
+        return (puzzle, cnt)
       (True, _) -> do
         putStrLn "good guess!"
-        return (fillInCharacter puzzle guess)
+        return (fillInCharacter puzzle guess, cnt)
       (False, _) -> do
         putStrLn "This character wasn't in the word, try again."
-        return (fillInCharacter puzzle guess)
+        return (fillInCharacter puzzle guess, succ cnt)
 
 gameOver :: Puzzle -> IO ()
 gameOver (Puzzle wordToGuess _ guessed) =
@@ -119,18 +119,33 @@ gameWin (Puzzle _ filledInSoFar _) =
        exitSuccess
     else return ()
 
-runGame :: Puzzle -> IO ()
-runGame puzzle = forever $ do
+runGame :: Puzzle -> Integer -> IO ()
+runGame puzzle cnt = forever $ do
   gameWin puzzle
   gameOver puzzle
   putStrLn $ "Current puzzle is: " ++ show puzzle
-  putStr "Guess a letter: "
+  putStrLn ("Guess a letter: " ++ show cnt ++ " <-count")
   guess <- getLine
+  -- let test = handleGuess puzzle guess
   case guess of
-      [c] -> handleGuess puzzle c >>= runGame
-      _ -> putStrLn "Your guess must be a single character"
+    [c] ->  do
+        handled <- (handleGuess puzzle c cnt) 
+        runGame (fst handled)  (snd handled)
+    "qqq" -> do
+        putStrLn "quiting"
+        exitSuccess
+    _ -> putStrLn "Your guess must be a single character"
+  -- case guess of
+  --     [c] -> handleGuess puzzle c cnt >>= runGame cnt
+  --     _ -> putStrLn "Your guess must be a single character"
         
-
+-- two questions on this... i'd like to provide an extra argument, a number, to both handleGuess and runGame. How can I do this?
+-- also, how would this be converted to do notation?
+-- ```hs
+--   case guess of
+--       [c] -> handleGuess puzzle c >>= runGame
+--       _ -> putStrLn "Your guess must be a single character"
+-- ```
 
 
 testPuzzle = Puzzle "theft" [Just 't',Just 'h',Nothing,Nothing,Just 't'] "ath" 
@@ -140,4 +155,4 @@ main = do
   allWords <- gameWords
   word <- randomWord allWords
   let puzzle = freshPuzzle (fmap toLower word)
-  runGame puzzle
+  runGame puzzle 0
